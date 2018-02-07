@@ -25,7 +25,9 @@ Alignment::~Alignment()
 int Alignment::readFasta(const char *fasta)
 {
 	int success = -1;
-	char x = 0;
+	int str_start = 0;
+	int str_len = 0;
+	char c = 0;
 	char line[1024];
 	ifstream fin;
 	fin.open(fasta);
@@ -42,9 +44,36 @@ int Alignment::readFasta(const char *fasta)
 			fin.getline(line, 1024);
 			cout << "did the getline" << endl;
 			cout << line << endl;
-
+			
+			str_start = fin.tellg();
+			cout << "start of string: " << str_start << endl;
+		
+			while( !fin.eof() && fin.get(c))
+			{
+				if(c == '\n')
+				{
+					if(!fin.eof() && fin.get(c))
+					{
+						if (c == '\n')
+							break;
+					}
+				}
+				else
+				{
+					str_len++;
+				}
+			}
+			if (c != '\n')
+				return 0;
+			cout << "length of string: " << str_len << endl;
+			
 			fin.getline(line, 512);
 			cout << line << endl;
+
+			fin.seekg(str_start, fin.beg);
+			fin.getline(line, 512);
+			cout << line << endl;
+
 
 			break;	
 		}
