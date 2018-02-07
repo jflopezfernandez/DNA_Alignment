@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 	}
 	else if(argc > 3)
 	{//config file specified 
-		align.readFasta(argv[3]);
+		align.readConfig(argv[3]);
 	}
 	else
 	{

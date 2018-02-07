@@ -28,6 +28,7 @@ public:
 	Alignment(const Alignment &copy);
 	~Alignment();
 	int readFasta(const char *fasta);
+	int readConfig(const char *config);
 	int optimalGlobalAlignment();
 	int optimalLocalAlignment();
 };
