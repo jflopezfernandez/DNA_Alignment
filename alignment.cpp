@@ -21,12 +21,12 @@ Alignment::Alignment(const Alignment &copy)
 Alignment::~Alignment()
 {
 
-}
-// file must be open 
+} 
 int Alignment::readFasta(const char *fasta)
 {
 	int success = -1;
 	char x = 0;
+	char line[1024];
 	ifstream fin;
 	fin.open(fasta);
 	cout << "readFasta()" << endl;
@@ -34,14 +34,19 @@ int Alignment::readFasta(const char *fasta)
 	if (fin.is_open())
 	{
 		success = 1;
+		cout << "It's opened!" << endl;
 		while(!fin.eof())
 		{
-			//read until > get the header line 
-			//read s1 
-			//read until > get the header line
-			//read s2 
-			x = fin.get();
-			cout << x;
+			fin.ignore(10, '>');
+			cout << "did the ignore" << endl;
+			fin.getline(line, 1024);
+			cout << "did the getline" << endl;
+			cout << line << endl;
+
+			fin.getline(line, 512);
+			cout << line << endl;
+
+			break;	
 		}
 	}
 	
