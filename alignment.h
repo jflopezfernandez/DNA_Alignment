@@ -9,7 +9,7 @@ using std::string;
 using std::cout;
 using std::cin;
 using std::endl;
-using std::fstream;
+using std::ifstream;
 
 struct DP_cell{
 	int score;
@@ -25,8 +25,9 @@ private:
 	int mg;
 public:	
 	Alignment(int match=0, int mismatch=0, int h=0, int g=0);
+	Alignment(const Alignment &copy);
 	~Alignment();
-	int readFasta(fstream fasta);
+	int readFasta(const char *fasta);
 	int optimalGlobalAlignment();
 	int optimalLocalAlignment();
 };

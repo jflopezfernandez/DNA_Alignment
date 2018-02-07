@@ -9,13 +9,41 @@ Alignment::Alignment(int match, int mismatch, int h, int g)
 	mstr1 = "";
 	mstr2 = "";
 }
+Alignment::Alignment(const Alignment &copy)
+{
+	mmatch = copy.mmatch;
+	mmismatch = copy.mmismatch;
+	mh = copy.mh;
+	mg = copy.mg;
+	mstr1 = "";
+	mstr2 = "";
+}
 Alignment::~Alignment()
 {
 
 }
-int Alignment::readFasta(fstream fasta)
+// file must be open 
+int Alignment::readFasta(const char *fasta)
 {
-	return -1;
+	int success = -1;
+	char x = 0;
+	ifstream fin;
+	fin.open(fasta);
+	cout << "readFasta()" << endl;
+	
+	if (fin.is_open())
+	{
+		success = 1;
+//		cout << "reading " << endl;
+		while(!fin.eof())
+		{
+			x = fin.get();
+			cout << x;
+		}
+	}
+	
+	fin.close();
+	return success;
 }
 int Alignment::optimalGlobalAlignment()
 {
