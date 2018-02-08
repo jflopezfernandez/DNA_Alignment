@@ -19,10 +19,15 @@ class Alignment{
 private:
 	string mstr1;
 	string mstr2;
+	int mstr1_len;
+	int mstr2_len;
 	int mmatch;
 	int mmismatch;
 	int mh;
 	int mg;
+	
+	int setLengthsFromFasta(const char *fasta);
+	int setStringsFromFasta(const char *fasta);
 public:	
 	Alignment(int match=0, int mismatch=0, int h=0, int g=0);
 	Alignment(const Alignment &copy);
