@@ -12,11 +12,13 @@ int main(int argc, char *argv[])
 	//<exe><inputfile w/ s1 s2><0:global, 1:local>[config file]
 	if(argc == 3)
 	{
-
+		success == align.readFasta(argv[1]);
+		success &= align.readConfig("parameters.config");
+		align.optimalGlobalAlignment();
 	}
 	else if(argc > 3)
 	{//config file specified 
-		success &= align.readFasta(argv[1]);
+		success == align.readFasta(argv[1]);
 		success &= align.readConfig(argv[3]);
 	}
 	else
@@ -24,7 +26,7 @@ int main(int argc, char *argv[])
 		cout << "format: <exe name> <inputfile containing s1 s2> <0:global, 1:local> [parameter config file]" << endl;
 	}
 	cout << "success: ";
-	success == 1? cout << "True" << endl: cout << "False" << endl;
+	success != 0? cout << "True" << endl: cout << "False" << endl;
 
 	return 0;
 }

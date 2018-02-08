@@ -29,111 +29,6 @@ Alignment::~Alignment()
 int Alignment::readFasta(const char *fasta)
 {
 	int success = 0;
-/*	int str_start = 0;
-//	int str_len = 0;
-	char c = 0;
-	char line[1024];
-	ifstream fin;
-	fin.open(fasta);
-	cout << "readFasta()" << endl;
-	
-	if (fin.is_open())
-	{
-		success = 1;
-		cout << "It's opened!" << endl;
-	
-		fin.ignore(10, '>');
-//		cout << "did the ignore" << endl;
-		fin.getline(line, 1024);
-//		cout << "did the getline" << endl;
-//		cout << line << endl;
-			
-		str_start = fin.tellg();
-		cout << "start of string: " << str_start << endl;
-		
-		//length of str1 
-		while( !fin.eof() && fin.get(c))
-		{
-			if(c == '\n')
-			{
-				if(!fin.eof() && fin.get(c))
-				{
-					if (c == '\n')
-						break;
-					else
-						mstr1_len++;
-				}
-			}
-			else
-			{
-				mstr1_len++;
-			}
-		}
-		cout << "length of string 1: " << mstr1_len << endl;
-		
-//		fin.getline(line, 512);
-//		cout << line << endl;
-		
-		//copy the seq over to the str skipping \n
-		fin.seekg(str_start, fin.beg);
-		mstr1.resize(mstr1_len + 1);
-		for (int i = 0; i < mstr1_len; i++)
-		{
-			fin.get(c);
-//			cout << c;
-			if ( c != '\n' )
-				mstr1[i] = c;
-			else
-				i--;
-		}
-		mstr1[mstr1_len + 1] = '\0';
-		cout << mstr1 << endl;
-		
-		fin.ignore(3, '>');
-		fin.getline(line, 1024);
-		cout << endl << line << endl;
-
-		// get str2 length 
-		while(fin.get(c))
-		{
-			cout << c << endl;
-			if(c != '\n')
-				break;
-		}
-//		fin.get(c);
-		c == '\n'? cout << "Fuck that" << endl: cout << "Shit... now what" << endl;
-		str_start = fin.tellg();
-		str_start--;
-		cout << "start of 2nd string: " << str_start << endl;
-		while(!fin.eof() && fin.get(c))
-		{
-			if(c != '\n')
-				mstr2_len++;
-		}
-
-		mstr2.resize(mstr2_len + 1);
-		cout << "length of 2nd string: " << mstr2_len << endl;
-		
-		//copy seq to str2
-		
-		fin.seekg(str_start, fin.beg);
-//		fin.getline(line, 1024);
-//		cout << "line at start: " << line << endl;
-		for (int i = 0; i < mstr2_len; i++)
-		{
-			fin.get(c);
-			cout << c;
-			if ( c != '\n' )
-				mstr2[i] = c;
-			else
-				i--;
-		}
-		mstr2[mstr2_len + 1] = '\0';
-		cout << mstr2 << endl;
-		
-	}
-	
-	fin.close();*/
 	success  = setLengthsFromFasta(fasta);
 	cout << "len1: " << mstr1_len << ", len2: " << mstr2_len << endl;
 	success &= setStringsFromFasta(fasta);
@@ -180,6 +75,8 @@ int Alignment::setLengthsFromFasta(const char *fasta)
 	fin.close();
 	return success;
 }
+// must have correct file format and mstr(1/2)_len must be initialized
+// by setLengthsFromFasta()
 int Alignment::setStringsFromFasta(const char *fasta)
 {	
 	int success = 0;
@@ -197,7 +94,7 @@ int Alignment::setStringsFromFasta(const char *fasta)
 		fin.ignore(10, '>');
 		fin.getline(line, 1024);
 		//count str1_len
-		for(int i = 0; !fin.eof() && fin.get(c) && i < mstr1_len; )
+		for(int i = 0;/* !fin.eof() &&*/ fin.get(c) && i < mstr1_len; )
 		{
 			if(c == '>')
 				break;
@@ -211,9 +108,9 @@ int Alignment::setStringsFromFasta(const char *fasta)
 		//ignore the header 
 		fin.getline(line, 1024);
 		fin.getline(line, 1024);
-		cout << "line=" << line << endl;
+//		cout << "line=" << line << endl;
 		//count str2_len
-		for(int i = 0; !fin.eof() && fin.get(c) && i < mstr2_len; )
+		for(int i = 0;/* !fin.eof() &&*/ fin.get(c) && i < mstr2_len; )
 		{
 			if(c != '\n')
 			{
@@ -267,7 +164,41 @@ int Alignment::readConfig(const char *config)
 }
 int Alignment::optimalGlobalAlignment()
 {
+	int aAlign[mstr1_len][mstr2_len] = { 0 };
+	// use str lens to make the table 
+	mMatrix = new DP_Cell*[mstr1_len];
+	for (int i = 0; i < mstr1_len; i++)
+		mMatrix[i] = new DP_Cell[mstr2_len];
+
+	//init initial row/coloumn
+	initFirstRowColumn();
+	//go forward 
+	//retrace back 
 	return -1;
+}
+//aAlign[mstr1_len][mstr2_len]
+int Alignment::initFirstRowColumn()
+{
+	//INT_MIN is min interger const from <climits>
+	//init 0,0
+	mMatrix[0][0].score_d = 0;
+	mMatrix[0][0].score_s = 0;
+	mMatrix[0][0].score_i = 0;
+	//init i,0
+	for(int i = 1; i < mstr1_len; i++)
+	{
+		mMatrix[i][0].score_d = mh + ( i * mg );
+		mMatrix[i][0].score_s = INT_MIN;
+		mMatrix[i][0].score_i = INT_MIN;
+	}
+	//init 0,j
+	for(int j = 0; j < mstr2_len; j++)
+	{
+		mMatrix[0][j].score_d = INT_MIN;
+		mMatrix[0][j].score_s = INT_MIN;
+		mMatrix[0][j].score_i = mh + ( j * mg );
+	}
+	return 0;
 }
 int Alignment::optimalLocalAlignment()
 {
