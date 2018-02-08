@@ -56,6 +56,8 @@ int Alignment::readFasta(const char *fasta)
 					{
 						if (c == '\n')
 							break;
+						else
+							str_len++;
 					}
 				}
 				else
@@ -67,12 +69,22 @@ int Alignment::readFasta(const char *fasta)
 				return 0;
 			cout << "length of string: " << str_len << endl;
 			
-			fin.getline(line, 512);
-			cout << line << endl;
+//			fin.getline(line, 512);
+//			cout << line << endl;
 
 			fin.seekg(str_start, fin.beg);
-			fin.getline(line, 512);
-			cout << line << endl;
+			mstr1.resize(str_len + 1);
+			for (int i = 0; i < str_len; i++)
+			{
+				fin.get(c);
+				cout << c;
+				if ( c != '\n' )
+					mstr1[i] = c;
+				else
+					i--;
+			}
+			mstr1[str_len + 1] = '\0';
+			cout << endl;
 
 
 			break;	
