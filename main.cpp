@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 	int success = 0;
 	ifstream fin;
 	printAllArgs(argc, argv);
+	cout <<  endl;
 	Alignment align = Alignment();
 	
 	//<exe><inputfile w/ s1 s2><0:global, 1:local>[config file]
@@ -14,21 +15,24 @@ int main(int argc, char *argv[])
 	{
 		success == align.readFasta(argv[1]);
 		success &= align.readConfig("parameters.config");
-		align.optimalGlobalAlignment();
+		if(argv[2][0] == '0')
+			align.optimalGlobalAlignment();
+		else 
+			align.optimalLocalAlignment();
 	}
 	else if(argc > 3)
 	{//config file specified 
 		success == align.readFasta(argv[1]);
 		success &= align.readConfig(argv[3]);
-		align.optimalGlobalAlignment();
+		if(argv[2][0] == '0')
+			align.optimalGlobalAlignment();
+		else
+			align.optimalLocalAlignment();
 	}
 	else
 	{
 		cout << "format: <exe name> <inputfile containing s1 s2> <0:global, 1:local> [parameter config file]" << endl;
 	}
-	cout << "success: ";
-	success != 0? cout << "True" << endl: cout << "False" << endl;
-
 	return 0;
 }
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <climits>
+#include <string>
 
 using std::string;
 using std::cout;
@@ -29,6 +30,9 @@ private:
 	int mh;
 	int mg;
 	DP_Cell **mMatrix;
+	int mlocal_max;  //just for local alignment 
+	int mlocal_max_i;
+	int mlocal_max_j;
 	
 	int setLengthsFromFasta(const char *fasta);
 	int setStringsFromFasta(const char *fasta);
@@ -38,6 +42,10 @@ private:
 	int S(int i, int j);
 	int printMatrix();
 	void retraceGlobal();
+	int initFirstRowColumnLocal();
+	int forwardComputationLocal();
+	void retraceLocal();
+
 public:	
 	Alignment(int match=0, int mismatch=0, int h=0, int g=0);
 	Alignment(const Alignment &copy);
