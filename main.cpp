@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 	{//config file specified 
 		success == align.readFasta(argv[1]);
 		success &= align.readConfig(argv[3]);
+		align.optimalGlobalAlignment();
 	}
 	else
 	{

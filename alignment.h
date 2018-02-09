@@ -33,7 +33,11 @@ private:
 	int setLengthsFromFasta(const char *fasta);
 	int setStringsFromFasta(const char *fasta);
 	int initFirstRowColumn();
-
+	int forwardComputationGlobal();
+	int maxOfThree(int n1, int n2, int n3);
+	int S(int i, int j);
+	int printMatrix();
+	void retraceGlobal();
 public:	
 	Alignment(int match=0, int mismatch=0, int h=0, int g=0);
 	Alignment(const Alignment &copy);
