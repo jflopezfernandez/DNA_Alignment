@@ -33,6 +33,8 @@ private:
 	int mlocal_max;  //just for local alignment 
 	int mlocal_max_i;
 	int mlocal_max_j;
+	char name1[1024];
+	char name2[1024];
 	
 	int setLengthsFromFasta(const char *fasta);
 	int setStringsFromFasta(const char *fasta);

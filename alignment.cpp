@@ -30,9 +30,10 @@ int Alignment::readFasta(const char *fasta)
 {
 	int success = 0;
 	success  = setLengthsFromFasta(fasta);
-	cout << "s1 length: " << mstr1_len << endl << "s2 length: " << mstr2_len << endl;
 	success &= setStringsFromFasta(fasta);
 //	cout << "str1: \n" << mstr1 <<  str2: \n" << mstr2 << endl;
+	cout << "s1 name: \"" << name1 << "\", s1 length: " << mstr1_len << endl;
+	cout << "s2 name: \"" << name2 << "\", s2 length: " << mstr2_len << endl;
 	return success;
 }
 int Alignment::setLengthsFromFasta(const char *fasta)
@@ -50,7 +51,8 @@ int Alignment::setLengthsFromFasta(const char *fasta)
 	{
 		//ignore the header
 		fin.ignore(10, '>');
-		fin.getline(line, 1024);
+		fin.getline(name1, 1024);
+		name1[1023] = 0;
 		//count str1_len
 		while(!fin.eof() && fin.get(c))
 		{
@@ -60,7 +62,8 @@ int Alignment::setLengthsFromFasta(const char *fasta)
 				mstr1_len++;
 		}
 		//ignore the header 
-		fin.getline(line, 1024);
+		fin.getline(name2, 1024);
+		name2[1023] = 0;
 		//count str2_len
 		while(!fin.eof() && fin.get(c))
 		{
