@@ -428,9 +428,9 @@ int Alignment::optimalLocalAlignment()
 	// once per execution, I don't actually 
 	// bother to deallocate any of it. 
 	// So, beware. 
-	mMatrix = new DP_Cell*[mstr1_len];
-	for (int i = 0; i < mstr1_len; i++)
-		mMatrix[i] = new DP_Cell[mstr2_len];
+	mMatrix = new DP_Cell*[mstr1_len+1];
+	for (int i = 0; i < mstr1_len+1; i++)
+		mMatrix[i] = new DP_Cell[mstr2_len+1];
 
 	//init initial row/coloumn
 	initFirstRowColumnLocal();
@@ -439,9 +439,11 @@ int Alignment::optimalLocalAlignment()
 	forwardComputationLocal();
 //	printMatrix();
 
-	int optimal_score = maxOfThree(mMatrix[mstr1_len-1][mstr2_len-1].score_d,
-					mMatrix[mstr1_len-1][mstr2_len-1].score_s,
-					mMatrix[mstr1_len-1][mstr2_len-1].score_i);
+	//asdf
+	int optimal_score = mlocal_max;
+	/*maxOfThree(mMatrix[mstr1_len][mstr2_len].score_d,
+					mMatrix[mstr1_len][mstr2_len].score_s,
+					mMatrix[mstr1_len][mstr2_len].score_i);*/
 //	cout << "optimal score" << optimal_score << endl;
 
 	//retrace back 
@@ -452,14 +454,14 @@ int Alignment::initFirstRowColumnLocal()
 {
 	//INT_MIN is min interger const from <climits>
 	//init i,0 where i >= 0
-	for(int i = 0; i < mstr1_len; i++)
+	for(int i = 0; i < mstr1_len+1; i++)
 	{
 		mMatrix[i][0].score_d = 0;
 		mMatrix[i][0].score_s = 0;
 		mMatrix[i][0].score_i = 0;
 	}
 	//init 0,j where j >= 0
-	for(int j = 0; j < mstr2_len; j++)
+	for(int j = 0; j < mstr2_len+1; j++)
 	{
 		mMatrix[0][j].score_d = 0;
 		mMatrix[0][j].score_s = 0;
@@ -482,20 +484,26 @@ int Alignment::forwardComputationLocal()
 	score_d_d = score_d_s = score_d_i = 0; 
 	score_s_d = score_s_s = score_s_i = 0; 
 	score_i_d = score_i_s = score_i_i = 0; 
-	
+
 	//start at 1, first row/column already done
-	for(int i = 1; i < mstr1_len; i++)
+	for(int i = 1; i < mstr1_len+1; i++)
 	{
-		for(int j = 1; j < mstr2_len; j++)
+		for(int j = 1; j < mstr2_len+1; j++)
 		{
+			//not just cuz
+			score_d_d = score_d_s = score_d_i = 0; 
+			score_s_d = score_s_s = score_s_i = 0; 
+			score_i_d = score_i_s = score_i_i = 0; 
+
+
 			// calculate d score 
 			if(mMatrix[i-1][j].score_d != INT_MIN) score_d_d = mMatrix[i-1][j].score_d + mg;
 			if(mMatrix[i-1][j].score_s != INT_MIN) score_d_s = mMatrix[i-1][j].score_s + mg + mh; // start of gap
 			if(mMatrix[i-1][j].score_i != INT_MIN) score_d_i = mMatrix[i-1][j].score_i + mg + mh; // start of gap
 			// calculate s score 
-			if(mMatrix[i-1][j-1].score_d != INT_MIN) score_s_d = mMatrix[i-1][j-1].score_d + S(i,j);
-			if(mMatrix[i-1][j-1].score_s != INT_MIN) score_s_s = mMatrix[i-1][j-1].score_s + S(i,j);
-			if(mMatrix[i-1][j-1].score_i != INT_MIN) score_s_i = mMatrix[i-1][j-1].score_i + S(i,j);
+			if(mMatrix[i-1][j-1].score_d != INT_MIN) score_s_d = mMatrix[i-1][j-1].score_d + S(i-1,j-1);
+			if(mMatrix[i-1][j-1].score_s != INT_MIN) score_s_s = mMatrix[i-1][j-1].score_s + S(i-1,j-1);
+			if(mMatrix[i-1][j-1].score_i != INT_MIN) score_s_i = mMatrix[i-1][j-1].score_i + S(i-1,j-1);
 			// calculate i score 
 			if(mMatrix[i][j-1].score_d != INT_MIN) score_i_d = mMatrix[i][j-1].score_d + mg + mh; // start of gap
 			if(mMatrix[i][j-1].score_s != INT_MIN) score_i_s = mMatrix[i][j-1].score_s + mg + mh; // start of gap
