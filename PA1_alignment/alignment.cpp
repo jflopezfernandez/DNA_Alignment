@@ -175,18 +175,24 @@ int Alignment::optimalGlobalAlignment()
 {
 //	int aAlign[mstr1_len][mstr2_len] = { 0 };
 	// use str lens to make the table 
-	mMatrix = new DP_Cell*[mstr1_len];
-	for (int i = 0; i < mstr1_len; i++)
-		mMatrix[i] = new DP_Cell[mstr2_len];
+	mMatrix = new DP_Cell*[mstr1_len + 1];
+	for (int i = 0; i < mstr1_len + 1; i++)
+		mMatrix[i] = new DP_Cell[mstr2_len + 1];
 
 	//init initial row/coloumn
 	initFirstRowColumn();
 	//go forward
 	forwardComputationGlobal();
 //	printMatrix();
-	int optimal_score = maxOfThree(mMatrix[mstr1_len-1][mstr2_len-1].score_d,
-					mMatrix[mstr1_len-1][mstr2_len-1].score_s,
-					mMatrix[mstr1_len-1][mstr2_len-1].score_i);
+
+	//checking scores 
+	cout << "d: " << mMatrix[mstr1_len][mstr2_len].score_d << endl;
+	cout << "s: " << mMatrix[mstr1_len][mstr2_len].score_s << endl;
+	cout << "i: " << mMatrix[mstr1_len][mstr2_len].score_i << endl;
+
+	int optimal_score = maxOfThree(mMatrix[mstr1_len][mstr2_len].score_d,
+					mMatrix[mstr1_len][mstr2_len].score_s,
+					mMatrix[mstr1_len][mstr2_len].score_i);
 //	cout << "optimal score" << optimal_score << endl;
 	//retrace back 
 	retraceGlobal();
@@ -201,18 +207,18 @@ int Alignment::initFirstRowColumn()
 	mMatrix[0][0].score_s = 0;
 	mMatrix[0][0].score_i = INT_MIN;
 	//init i,0 where i > 0
-	for(int i = 1; i < mstr1_len; i++)
+	for(int i = 1; i <= mstr1_len; i++)
 	{
-		mMatrix[i][0].score_d = mh + ( i * mg );
+		mMatrix[i][0].score_d = INT_MIN; //mh + ( i * mg );
 		mMatrix[i][0].score_s = INT_MIN;
-		mMatrix[i][0].score_i = INT_MIN;
+		mMatrix[i][0].score_i = mh + ( i * mg );
 	}
 	//init 0,j where j > 0
-	for(int j = 1; j < mstr2_len; j++)
+	for(int j = 1; j <= mstr2_len; j++)
 	{
-		mMatrix[0][j].score_d = INT_MIN;
+		mMatrix[0][j].score_d = mh + ( j * mg );
 		mMatrix[0][j].score_s = INT_MIN;
-		mMatrix[0][j].score_i = mh + ( j * mg );
+		mMatrix[0][j].score_i = INT_MIN;//mh + ( j * mg );
 	}
 	return 0;
 }
@@ -222,29 +228,36 @@ int Alignment::forwardComputationGlobal()
 	int score_d_d, score_d_s, score_d_i; 
 	int score_s_d, score_s_s, score_s_i; 
 	int score_i_d, score_i_s, score_i_i; 
-
-	//init just cuz 
+ 
 	score_d_d = score_d_s = score_d_i = INT_MIN; 
 	score_s_d = score_s_s = score_s_i = INT_MIN; 
 	score_i_d = score_i_s = score_i_i = INT_MIN; 
 	
 	//start at 1, first row/column already done
-	for(int i = 1; i < mstr1_len; i++)
+	for(int i = 1; i <= mstr1_len; i++)
 	{
-		for(int j = 1; j < mstr2_len; j++)
+		for(int j = 1; j <= mstr2_len; j++)
 		{
 			// calculate d score 
-			if(mMatrix[i-1][j].score_d != INT_MIN) score_d_d = mMatrix[i-1][j].score_d + mg;
+			/*if(mMatrix[i-1][j].score_d != INT_MIN) score_d_d = mMatrix[i-1][j].score_d + mg;
 			if(mMatrix[i-1][j].score_s != INT_MIN) score_d_s = mMatrix[i-1][j].score_s + mg + mh; // start of gap
 			if(mMatrix[i-1][j].score_i != INT_MIN) score_d_i = mMatrix[i-1][j].score_i + mg + mh; // start of gap
+			*/
+			if(mMatrix[i][j-1].score_d != INT_MIN) score_d_d = mMatrix[i][j-1].score_d + mg;
+			if(mMatrix[i][j-1].score_s != INT_MIN) score_d_s = mMatrix[i][j-1].score_s + mg + mh; // start of gap
+			if(mMatrix[i][j-1].score_i != INT_MIN) score_d_i = mMatrix[i][j-1].score_i + mg + mh; // start of gap
 			// calculate s score 
-			if(mMatrix[i-1][j-1].score_d != INT_MIN) score_s_d = mMatrix[i-1][j-1].score_d + S(i,j);
-			if(mMatrix[i-1][j-1].score_s != INT_MIN) score_s_s = mMatrix[i-1][j-1].score_s + S(i,j);
-			if(mMatrix[i-1][j-1].score_i != INT_MIN) score_s_i = mMatrix[i-1][j-1].score_i + S(i,j);
+			if(mMatrix[i-1][j-1].score_d != INT_MIN) score_s_d = mMatrix[i-1][j-1].score_d + S(i-1,j-1);
+			if(mMatrix[i-1][j-1].score_s != INT_MIN) score_s_s = mMatrix[i-1][j-1].score_s + S(i-1,j-1);
+			if(mMatrix[i-1][j-1].score_i != INT_MIN) score_s_i = mMatrix[i-1][j-1].score_i + S(i-1,j-1);
 			// calculate i score 
-			if(mMatrix[i][j-1].score_d != INT_MIN) score_i_d = mMatrix[i][j-1].score_d + mg + mh; // start of gap
+			/*if(mMatrix[i][j-1].score_d != INT_MIN) score_i_d = mMatrix[i][j-1].score_d + mg + mh; // start of gap
 			if(mMatrix[i][j-1].score_s != INT_MIN) score_i_s = mMatrix[i][j-1].score_s + mg + mh; // start of gap
 			if(mMatrix[i][j-1].score_i != INT_MIN) score_i_i = mMatrix[i][j-1].score_i + mg;
+			*/
+			if(mMatrix[i-1][j].score_d != INT_MIN) score_i_d = mMatrix[i-1][j].score_d + mg + mh; // start of gap
+			if(mMatrix[i-1][j].score_s != INT_MIN) score_i_s = mMatrix[i-1][j].score_s + mg + mh; // start of gap
+			if(mMatrix[i-1][j].score_i != INT_MIN) score_i_i = mMatrix[i-1][j].score_i + mg;
 			// find maxes
 			mMatrix[i][j].score_d = maxOfThree(score_d_d, score_d_s, score_d_i);
 			mMatrix[i][j].score_s = maxOfThree(score_s_d, score_s_s, score_s_i);
@@ -279,9 +292,9 @@ int Alignment::S(int i, int j)
 //str(1/2)_len and matrix must be intialized 
 int Alignment::printMatrix()
 {
-	for(int i = 0; i < mstr1_len; i++)
+	for(int i = 0; i <= mstr1_len; i++)
 	{
-		for(int j = 0; j < mstr2_len; j++)
+		for(int j = 0; j <= mstr2_len; j++)
 		{
 			cout << "[" << mMatrix[i][j].score_d;
 			cout << "," << mMatrix[i][j].score_s;
@@ -295,8 +308,8 @@ int Alignment::printMatrix()
 void Alignment::retraceGlobal()
 {
 	//start at last cell and move to the cell with the max score 
-	int i = mstr1_len - 1;
-	int j = mstr2_len - 1;
+	int i = mstr1_len;
+	int j = mstr2_len;
 	int cell_max = 0;
 	char aStr1[mstr1_len + mstr2_len] = { 0 };
 	char aStr2[mstr1_len + mstr2_len] = { 0 };
@@ -309,11 +322,53 @@ void Alignment::retraceGlobal()
 	// record the aligned strings 
 	while ( i != -1 || j != -1 )
 	{
-		//find whether D,S, or I was the max 
-		cell_max = maxOfThree(mMatrix[i][j].score_d,
+		if ( i < 0 || j < 0 || aStr_index < 0)
+			cout << "i=" << i << " j="<< j << " aStr_index=" << aStr_index << endl;
+		//find whether D,S, or I was the max
+		if (i != -1 && j != -1) 
+		{
+			cell_max = maxOfThree(mMatrix[i][j].score_d,
 					 mMatrix[i][j].score_s,
-					 mMatrix[i][j].score_i); 
-		if(cell_max == mMatrix[i][j].score_d )
+					 mMatrix[i][j].score_i);
+			cout << "retraceGlobal(): cell_max=" << cell_max << endl;
+		}
+
+
+		if( (j != -1 && cell_max == mMatrix[i][j].score_d) || i == -1 )
+		{//deletion
+			aStr1[aStr_index] = '-';//mstr1[i];
+			aStr2[aStr_index] = mstr2[j];
+			j--;
+			if (bGap == false)
+				opening_gaps++;
+			bGap = true;
+			gaps++;
+		}	
+		else if( i != -1 && j != -1 && cell_max == mMatrix[i][j].score_s)
+		{//subsitution 	
+			aStr1[aStr_index] = mstr1[i];
+			aStr2[aStr_index] = mstr2[j];
+			i--;
+			j--;
+			bGap = false;
+			if (aStr1[aStr_index] == aStr2[aStr_index])
+				matches++;
+			else
+				mismatches++;
+		}
+		else 
+		{//insertion 	
+			aStr1[aStr_index] = mstr1[i];//'-';
+			aStr2[aStr_index] = '-'; //mstr2[j];
+			i--;
+			if (bGap == false)
+				opening_gaps++;
+			bGap = true;
+			gaps++;
+		}
+
+
+/*		if( (i != -1 && cell_max == mMatrix[i][j].score_d) || j == -1 )
 		{//deletion
 			aStr1[aStr_index] = mstr1[i];
 			aStr2[aStr_index] = '-';
@@ -323,7 +378,7 @@ void Alignment::retraceGlobal()
 			bGap = true;
 			gaps++;
 		}
-		else if( cell_max == mMatrix[i][j].score_s)
+		else if( i != -1 && j != -1 && cell_max == mMatrix[i][j].score_s)
 		{//subsitution 	
 			aStr1[aStr_index] = mstr1[i];
 			aStr2[aStr_index] = mstr2[j];
@@ -344,7 +399,7 @@ void Alignment::retraceGlobal()
 				opening_gaps++;
 			bGap = true;
 			gaps++;
-		}
+		}*/
 
 		aStr_index++;
 
@@ -354,6 +409,7 @@ void Alignment::retraceGlobal()
 			return;
 		}
 	}
+	cout << "About to print strings..." << endl;
 	aStr_index--; //I want it to be on the last character 
 	//print that alignment!
 	int count = 1, count2 = 1;
@@ -403,9 +459,9 @@ void Alignment::retraceGlobal()
 	//print them stats 
 	int len = 0;
 	mstr1_len > mstr2_len? len = mstr1_len: len = mstr2_len;
-	cell_max = maxOfThree(mMatrix[mstr1_len-1][mstr2_len-1].score_d,
-				 mMatrix[mstr1_len-1][mstr2_len-1].score_s,
-				 mMatrix[mstr1_len-1][mstr2_len-1].score_i); 
+	cell_max = maxOfThree(mMatrix[mstr1_len][mstr2_len].score_d,
+				 mMatrix[mstr1_len][mstr2_len].score_s,
+				 mMatrix[mstr1_len][mstr2_len].score_i); 
 	cout << "Global alignment score: " << cell_max <<  endl;
 	cout << "Number of: matches=" << matches << ", mismatches=" << mismatches;
 	cout << ", gaps=" << gaps << ", opening gaps=" << opening_gaps << endl;
